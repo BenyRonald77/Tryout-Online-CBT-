@@ -33,6 +33,18 @@ new class extends Component
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @if (auth()->user()->isPeserta())
+                        <x-nav-link :href="route('tryout.index')" :active="request()->routeIs('tryout.*')" wire:navigate>
+                            {{ __('Tryout') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if (auth()->user()->isAdmin())
+                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.*')" wire:navigate>
+                            {{ __('Admin') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -84,6 +96,18 @@ new class extends Component
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @if (auth()->user()->isPeserta())
+                <x-responsive-nav-link :href="route('tryout.index')" :active="request()->routeIs('tryout.*')" wire:navigate>
+                    {{ __('Tryout') }}
+                </x-responsive-nav-link>
+            @endif
+
+            @if (auth()->user()->isAdmin())
+                <x-responsive-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.*')" wire:navigate>
+                    {{ __('Admin') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
