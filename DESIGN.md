@@ -23,6 +23,10 @@ Ini adalah aplikasi kerja internal (alat ujian dan administrasi), bukan situs ma
 
 Font sistem default Tailwind (Inter, dibawa oleh Breeze) dipakai karena aplikasi ini butuh keterbacaan tinggi untuk teks soal dan tabel data, bukan karakter visual yang mencolok. Tidak ada monospace besar, tidak ada uppercase dengan letter-spacing lebar.
 
+## Tema (light only, tanpa toggle dark mode)
+
+Aplikasi ini sengaja hanya punya satu tema (terang), tanpa toggle dark mode, dengan alasan: ini adalah alat ujian yang dipakai pada jendela waktu yang ketat (peserta fokus membaca soal, bukan menjelajah santai), sering dilihat berjamaan di ruang lab/kelas dengan pencahayaan terang, dan skop kontras yang sudah diverifikasi (lihat catatan WCAG di atas) hanya untuk satu tema mengurangi risiko ada kombinasi warna yang lolos tanpa diuji. Ini keputusan sadar (bukan default yang dilewatkan begitu saja), sesuai R-21: kalau di kemudian hari ada permintaan nyata untuk dark mode, itu akan dibangun sebagai toggle yang benar-benar berfungsi di kedua mode, bukan ditambahkan setengah jalan.
+
 ## Yang sengaja tidak dipakai
 
 - Tidak ada ilustrasi atau gambar dekoratif (produk ini tidak butuh ilustrasi untuk dijelaskan).
