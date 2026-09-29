@@ -43,15 +43,14 @@
                     {!! $current->question->body !!}
                 </div>
 
-                <div class="space-y-2" role="radiogroup" aria-label="Pilihan jawaban">
+                <div class="space-y-2" aria-label="Pilihan jawaban">
                     @foreach ($current->orderedOptions() as $letterIndex => $option)
                         @php($letter = chr(65 + $letterIndex))
                         <button
                             type="button"
                             wire:click="selectOption({{ $current->id }}, {{ $option->id }})"
                             wire:key="option-{{ $current->id }}-{{ $option->id }}"
-                            role="radio"
-                            aria-checked="{{ $selectedOptionId === $option->id ? 'true' : 'false' }}"
+                            aria-pressed="{{ $selectedOptionId === $option->id ? 'true' : 'false' }}"
                             class="w-full text-left px-4 py-3 rounded-md border flex items-start gap-3 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-1 transition-colors
                                 {{ $selectedOptionId === $option->id ? 'border-teal-600 bg-teal-50' : 'border-gray-200 hover:bg-gray-50' }}"
                         >

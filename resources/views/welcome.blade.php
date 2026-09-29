@@ -61,7 +61,7 @@
                 </div>
             </main>
 
-            <footer class="max-w-5xl w-full mx-auto px-6 py-8 text-sm text-gray-400">
+            <footer class="max-w-5xl w-full mx-auto px-6 py-8 text-sm text-gray-500">
                 Tryout Online CBT
             </footer>
         </div>

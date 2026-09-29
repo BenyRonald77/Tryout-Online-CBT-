@@ -102,7 +102,7 @@
                                 />
                                 <span class="text-sm text-gray-800">
                                     {{ Str::limit(strip_tags($question->body), 100) }}
-                                    <span class="text-gray-400">({{ $question->subject?->name }})</span>
+                                    <span class="text-gray-500">({{ $question->subject?->name }})</span>
                                 </span>
                             </label>
                         @empty
