@@ -1,58 +1,114 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Tryout Online CBT
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi tryout online berbasis komputer (Computer Based Test) untuk simulasi ujian: admin membuat bank soal dan paket tryout terjadwal, peserta mengerjakan tryout dengan soal dan pilihan jawaban yang diacak per peserta, waktu pengerjaan ditegakkan oleh server (bukan jam browser), jawaban tersimpan otomatis, dan peringkat nasional tampil begitu tryout ditutup.
 
-## About Laravel
+Lihat `PRD.md` untuk latar belakang, lingkup fitur, dan kriteria penerimaan lengkap. Lihat `DESIGN.md` untuk arah desain (palet warna, dial energi/rhythm/motion) yang dipakai di seluruh UI.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tech stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel 12 (PHP 8.4)
+- Laravel Breeze (stack Livewire) untuk autentikasi
+- Livewire 3 untuk halaman ujian, ranking, dan CRUD admin
+- SQLite untuk database (default di environment ini)
+- Tailwind CSS untuk styling
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalasi & Setup
 
 ```bash
-composer require laravel/boost --dev
+composer install
+cp .env.example .env
+php artisan key:generate
 
-php artisan boost:install
+# Buat file database SQLite (kosongkan dulu jika sudah ada isinya)
+touch database/database.sqlite
+
+php artisan migrate --seed
+
+npm install
+npm run build
+
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Aplikasi bisa diakses di `http://127.0.0.1:8000`.
 
-## Contributing
+### Menjalankan penegakan waktu otomatis (wajib untuk fitur timer & auto-close)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Ada satu command terjadwal, `attempts:auto-submit-expired`, yang:
 
-## Code of Conduct
+1. Men-submit otomatis (dan menilai) setiap attempt yang statusnya masih `ongoing` tapi waktunya sudah habis, termasuk kalau peserta menutup tab tanpa menekan submit.
+2. Menutup (`status = closed`) setiap tryout yang jadwal `ends_at`-nya sudah lewat tapi belum ditutup manual oleh admin.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Command ini dijadwalkan berjalan setiap menit lewat `routes/console.php`. Untuk lingkungan development, jalankan di terminal terpisah:
 
-## Security Vulnerabilities
+```bash
+php artisan schedule:work
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Untuk production, pasang satu entri cron yang menjalankan `php artisan schedule:run` setiap menit, sesuai [dokumentasi scheduler Laravel](https://laravel.com/docs/scheduling).
 
-## License
+Tanpa `schedule:work`/cron ini, timer tetap ditegakkan secara defensif setiap kali peserta membuka halaman ujian atau melakukan autosave (attempt yang waktunya habis akan langsung dipaksa submit saat itu juga), jadi tidak ada kecurangan yang mungkin lewat refresh browser. Yang butuh scheduler adalah kasus peserta menutup tab dan tidak pernah membuka halaman itu lagi, serta penutupan otomatis tryout supaya peringkat tampil tanpa perlu ada yang mengakses halaman itu dulu.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Queue
+
+Environment ini memakai `QUEUE_CONNECTION=database` (tidak butuh Redis). Tabel queue sudah termasuk dalam migration bawaan Laravel (`jobs`), tidak ada job berat yang dipakai aplikasi ini saat ini, tapi worker bisa dijalankan dengan `php artisan queue:work` bila diperlukan di kemudian hari.
+
+### Database untuk deployment (MySQL)
+
+Environment sandbox ini memakai SQLite agar mudah dijalankan tanpa server database terpisah. Untuk deployment ke hosting yang umum dipakai (misalnya shared hosting dengan MySQL), buka `.env.example`: ada blok konfigurasi MySQL yang tinggal dibuka komentarnya (dan blok SQLite dikomentari), lalu isi kredensialnya di `.env`.
+
+## Akun Demo
+
+Akun-akun berikut dibuat oleh seeder (`database/seeders/DatabaseSeeder.php`). Ini adalah akun demo untuk keperluan pengujian aplikasi, bukan data orang sungguhan.
+
+| Peran | Email | Password |
+|---|---|---|
+| Admin | `admin@example.com` | `password` |
+| Peserta | `peserta@example.com` | `password` |
+| Peserta | `peserta2@example.com` | `password` |
+
+Data demo yang ikut dibuat oleh seeder:
+- 3 mata pelajaran (Matematika Dasar, Bahasa Indonesia, Wawasan Umum) dengan 10 soal pilihan ganda per mata pelajaran (total 30 soal, masing-masing 4 opsi jawaban).
+- **Tryout Simulasi Dasar (Campuran)**: berstatus `published`, jendela waktu sedang terbuka, berisi campuran ketiga mapel, siap dicoba langsung oleh akun peserta demo.
+- **Tryout Matematika Dasar (Contoh, Sudah Ditutup)**: berstatus `closed`, sudah punya 2 attempt selesai (satu per akun peserta demo) sehingga halaman peringkatnya langsung terisi tanpa perlu mengerjakan apa pun.
+
+## Menjalankan Tes
+
+```bash
+php artisan test
+```
+
+Ada 39 test (semuanya lulus saat terakhir dijalankan), mencakup: autentikasi bawaan Breeze, dan test khusus aplikasi ini di `tests/Feature/Tryout` dan `tests/Feature/Admin` yang mencakup:
+- Memulai attempt menghasilkan set soal & urutan opsi yang diacak dan tersimpan permanen untuk peserta tersebut.
+- Memulai attempt dua kali untuk tryout yang sama ditolak.
+- Autosave benar-benar menyimpan jawaban ke database, dan jawaban tidak hilang saat pindah soal.
+- Submit menghitung skor dengan benar berdasarkan jawaban yang tersimpan.
+- Attempt yang waktunya sudah habis tidak bisa lagi dijawab (baik lewat pemanggilan langsung maupun lewat halaman ujian, yang otomatis redirect ke halaman hasil).
+- Halaman peringkat tersembunyi (menampilkan pesan jujur) sampai tryout berstatus closed, lalu menampilkan data yang benar setelah itu.
+- Command terjadwal `attempts:auto-submit-expired` menutup attempt yang ditinggal dan tryout yang lewat jadwal.
+- CRUD admin: mata pelajaran, soal (dengan validasi tepat satu opsi benar), dan tryout (termasuk pengelolaan pool soal, publish, dan close), beserta pembatasan bahwa halaman admin tidak bisa diakses peserta atau tamu.
+
+## Fitur Utama
+
+**Untuk peserta:**
+- Registrasi & login.
+- Daftar tryout yang sedang dibuka, dengan status jelas (belum dibuka / bisa dimulai / sudah ditutup / sudah pernah diikuti).
+- Mengerjakan tryout: satu soal per layar, navigasi bebas antar soal, indikator "Menyimpan.../Tersimpan/Gagal menyimpan" yang jujur, timer mundur yang disinkronkan dari server.
+- Waktu pengerjaan ditegakkan oleh server: refresh halaman tidak menambah waktu, dan begitu waktu habis, jawaban terkunci otomatis.
+- Melihat hasil (skor dan rincian jawaban) milik sendiri.
+- Melihat peringkat nasional setelah tryout ditutup.
+
+**Untuk admin:**
+- CRUD mata pelajaran.
+- CRUD bank soal (pilihan ganda, 2-6 opsi, tepat satu jawaban benar).
+- Membuat tryout, mengatur pool soal sumber pengacakan, mempublikasikan, dan menutup tryout secara manual.
+- Dashboard hasil: daftar attempt per tryout beserta skor dan statusnya.
+
+## Struktur Proyek yang Relevan
+
+- `app/Services/AttemptService.php`: logika inti memulai, menjawab (autosave), dan menyelesaikan (submit/auto-expire) attempt. Semua perhitungan waktu berdasarkan `started_at` di database, tidak pernah mempercayai input klien.
+- `app/Services/TryoutService.php`: logika menutup tryout begitu jadwalnya lewat.
+- `app/Console/Commands/AutoSubmitExpiredAttempts.php`: command terjadwal yang dijelaskan di atas.
+- `app/Livewire/Peserta/ExamPage.php`: halaman ujian (timer, navigasi soal, autosave).
+- `app/Livewire/Peserta/RankingPage.php`: halaman peringkat nasional.
+- `app/Livewire/Admin/*`: CRUD admin (mata pelajaran, soal, tryout, dashboard hasil).
