@@ -172,7 +172,7 @@ class AttemptService
         // past the deadline, time is re-checked here against the database
         // before any write happens.
         if ($attempt->isOngoing() && $attempt->isTimeUp()) {
-            $this->finalize($attempt, 'expired', $attempt->deadline());
+            $attempt = $this->finalize($attempt, 'expired', $attempt->deadline());
         }
 
         if (! $attempt->isOngoing()) {
