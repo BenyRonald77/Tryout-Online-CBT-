@@ -119,6 +119,7 @@
                         Belum ada soal untuk filter ini.
                     </div>
                 @else
+                    <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 text-left text-gray-600">
                             <tr>
@@ -150,6 +151,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
             </div>
         </div>
