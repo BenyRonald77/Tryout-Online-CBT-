@@ -104,7 +104,7 @@ Catatan desain: `tryouts.subject_id` bersifat nullable karena satu tryout bisa b
 
 ### Ranking nasional
 - Halaman ranking untuk tryout yang belum `closed` menampilkan pesan jujur bahwa peringkat akan tampil setelah tryout ditutup, bukan tabel kosong atau data palsu.
-- Setelah tryout `closed`, halaman menampilkan seluruh attempt berstatus `submitted`, diurutkan skor tertinggi lebih dulu, dan jika skor sama, peserta yang submit lebih cepat berada di posisi lebih atas.
+- Setelah tryout `closed`, halaman menampilkan seluruh attempt yang sudah final (`submitted` maupun `expired`, yaitu attempt yang sudah dinilai dan punya `submitted_at`), diurutkan skor tertinggi lebih dulu, dan jika skor sama, peserta yang selesai lebih cepat (`submitted_at` lebih awal) berada di posisi lebih atas. Attempt berstatus `ongoing` tidak pernah ikut peringkat. Catatan: `submitted` dipakai saat peserta menekan tombol submit sendiri sebelum waktu habis, `expired` dipakai saat sistem menutup attempt secara otomatis karena waktu habis (baik lewat pemeriksaan on-access maupun command terjadwal); kedua status ini sama-sama sudah dinilai dan sama-sama tampil di peringkat, karena peserta yang kehabisan waktu tetap berhak diberi peringkat.
 - Status `closed` tercapai otomatis begitu `ends_at` terlewati (lewat command terjadwal) atau ditutup manual oleh admin sebelum itu.
 
 ### Admin CRUD
