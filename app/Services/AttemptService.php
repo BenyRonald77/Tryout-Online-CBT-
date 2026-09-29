@@ -167,6 +167,14 @@ class AttemptService
      */
     public function answer(Attempt $attempt, int $attemptQuestionId, int $optionId): void
     {
+        // Defensive check on every autosave request: even if the caller
+        // forgot to call forceSubmitIfExpired first, or a request raced
+        // past the deadline, time is re-checked here against the database
+        // before any write happens.
+        if ($attempt->isOngoing() && $attempt->isTimeUp()) {
+            $this->finalize($attempt, 'expired', $attempt->deadline());
+        }
+
         if (! $attempt->isOngoing()) {
             throw new RuntimeException('Waktu pengerjaan sudah berakhir, jawaban tidak bisa diubah lagi.');
         }
